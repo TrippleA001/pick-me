@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0b0e11" />
+    <title>Pick Me</title>
+    <script type="module" crossorigin src="./assets/game2d-UzoArJBk.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+    <link rel="modulepreload" crossorigin href="./assets/startng-Bolza1_8.js">
+    <link rel="stylesheet" crossorigin href="./assets/game2d-DmZ8dUlV.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="startng-card" id="player-card" hidden>
+        <img id="player-face" alt="" />
+        <div class="player-meta">
+          <b id="player-name"></b>
+          <span id="player-account"></span>
+        </div>
+        <button id="player-sign-in" hidden>Sign in</button>
+      </div>
+
+      <section id="boot">
+        <div class="boot-mark">PICK ME</div>
+        <div class="boot-msg" id="boot-msg">Shuffling the word list…</div>
+        <div class="boot-bar"><i></i></div>
+      </section>
+
+      <section id="title" class="hidden">
+        <h1>PICK ME</h1>
+        <p class="tagline">Two words. One survives.</p>
+
+        <div class="rule-card">
+          <p>
+            You and your opponent are dealt <b>the same seven letters</b>.
+          </p>
+          <p>
+            One word each, before the clock stops, scored against the other —
+            and only the higher one stays on the board.
+          </p>
+          <p>
+            Whatever is on your board when the clock runs out is played for you.
+          </p>
+        </div>
+
+        <div class="pick">
+          <div class="pick-label">Opponent</div>
+          <div class="pick-row" id="diff-row"></div>
+        </div>
+
+        <div class="pick">
+          <div class="pick-label">Wahala</div>
+          <div class="pick-row" id="clock-row"></div>
+          <div class="pick-note">
+            Only Serious wahala — 20 seconds — counts for the leaderboard.
+          </div>
+        </div>
+
+        <button class="primary" id="btn-start">Start duel</button>
+        <button class="ghost" id="btn-daily">Daily duel · pro</button>
+
+        <div class="board-card" id="board-card" hidden>
+          <div class="board-h">Leaderboard</div>
+          <ol id="board-list"></ol>
+        </div>
+
+        <p class="fine" id="dict-note"></p>
+      </section>
+
+      <section id="match" class="hidden">
+        <header id="hud">
+          <div class="hp">
+            <div class="hp-name">YOU</div>
+            <div class="hp-track"><i id="hp-you"></i></div>
+          </div>
+          <div class="hud-centre">
+            <div class="hud-top">
+              <span id="round-label">ROUND 1</span>
+              <span id="owner-label"></span>
+            </div>
+            <div class="hud-timer"><i id="timer-fill"></i></div>
+          </div>
+          <div class="hp them">
+            <div class="hp-name" id="them-name">CLUB</div>
+            <div class="hp-track"><i id="hp-them"></i></div>
+          </div>
+        </header>
+
+        <div id="lane">
+          <div class="mrow">
+            <span class="mtag" id="them-tag">THEM</span>
+            <div class="tiles" id="their-word"></div>
+            <span class="mscore" id="their-score"></span>
+          </div>
+          <div class="divider"></div>
+          <div class="mrow">
+            <span class="mtag" id="you-tag">YOU</span>
+            <div class="tiles" id="your-word"></div>
+            <span class="mscore" id="your-score"></span>
+          </div>
+        </div>
+
+        <div id="verdict"></div>
+        <div id="notice"></div>
+        <div id="wall"></div>
+
+        <footer id="tray">
+          <div class="rack" id="rack"></div>
+          <div class="controls">
+            <button class="ghost" id="btn-shuffle">Shuffle</button>
+            <button class="ghost" id="btn-clear">Clear</button>
+            <button class="ghost" id="btn-pass">Pass</button>
+            <button class="primary" id="btn-play">Play word</button>
+          </div>
+          <div class="next-row hidden" id="next-row">
+            <button class="primary" id="btn-next">Next round</button>
+          </div>
+        </footer>
+      </section>
+
+      <section id="result" class="hidden"></section>
+
+      <div id="blank-picker" class="hidden"></div>
+    </div>
+  </body>
+</html>

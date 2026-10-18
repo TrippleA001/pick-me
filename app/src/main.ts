@@ -51,10 +51,10 @@ const screens: Record<Screen, HTMLElement> = {
   result: el("result"),
 };
 
-const TIERS: Difficulty[] = ["rookie", "club", "pro"];
+const TIERS: Difficulty[] = ["rookie", "sharp", "pro"];
 const TIER_BLURB: Record<Difficulty, string> = {
   rookie: "weak words",
-  club: "strong words",
+  sharp: "strong words",
   pro: "the best word",
 };
 
@@ -63,7 +63,7 @@ interface Built {
   letter: string;
 }
 
-let difficulty: Difficulty = "club";
+let difficulty: Difficulty = "sharp";
 let clockMs = RANKED_MS;
 let matchRanked = true;
 let duel: DuelState | null = null;
@@ -211,6 +211,9 @@ function play(pass: boolean): void {
       setNotice(`${word.toUpperCase()} is not in the word list.`);
       return;
     }
+  } else {
+    // A pass plays nothing, so whatever is left on the board must not score.
+    clearWord();
   }
 
   phase = "reveal";

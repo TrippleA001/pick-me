@@ -2,11 +2,11 @@ import type { RNG } from "./rng";
 import { solve } from "./words";
 import type { SolvedWord } from "./words";
 
-export type Difficulty = "rookie" | "club" | "pro";
+export type Difficulty = "rookie" | "sharp" | "pro";
 
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   rookie: "ROOKIE",
-  club: "CLUB",
+  sharp: "SHARP",
   pro: "PRO",
 };
 
@@ -30,7 +30,7 @@ export function botPick(
 
   const best = solved[0].score;
 
-  if (difficulty === "club") {
+  if (difficulty === "sharp") {
     const pool = solved.filter((word) => word.score >= best * 0.8);
     return pick(pool, rng);
   }

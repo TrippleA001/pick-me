@@ -13,7 +13,7 @@ const appDir = path.resolve(fileURLToPath(import.meta.url), "..", "..");
 const repoRoot = path.resolve(appDir, "..");
 const distDir = path.join(appDir, "dist");
 
-const published = ["index.html", "assets", "data", "startng.json", "cover.png"];
+const published = ["index.html", "2d.html", "assets", "data", "startng.json", "cover.png"];
 
 let copied = 0;
 for (const name of published) {

@@ -2,127 +2,710 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b0e11" />
     <title>Pick Me</title>
-    <script type="module" crossorigin src="./assets/index-C79aeNJi.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DmZ8dUlV.css">
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0e11;
+        --panel: #12171d;
+        --line: #222a34;
+        --ink: #e8edf2;
+        --dim: #8b97a5;
+        --accent: #d8fd71;
+        --bad: #ff6b6b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font: 14px/1.5 "Segoe UI", system-ui, sans-serif;
+      }
+      #stage {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(130% 95% at 50% 6%, #16202a 0%, #0b0e11 55%, #07090b 100%);
+      }
+      #stage canvas {
+        display: block;
+      }
+      .hidden {
+        display: none !important;
+      }
+      /* The board owns the pointer, except where a control says otherwise. */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      button {
+        pointer-events: auto;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+        font-weight: 700;
+      }
+
+      /* ------------------------------------------------------------- hud --- */
+      .hud {
+        padding: 14px 20px 40px;
+        text-align: center;
+        /* A scrim, so the HUD stays readable where it crosses the cloth. */
+        background: linear-gradient(
+          180deg,
+          rgba(7, 9, 11, 0.94) 0%,
+          rgba(7, 9, 11, 0.82) 45%,
+          rgba(7, 9, 11, 0) 100%
+        );
+      }
+      .kicker {
+        font-size: 10.5px;
+        letter-spacing: 0.3em;
+        color: var(--dim);
+      }
+      .hp-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 8px;
+      }
+      .hp {
+        flex: 1 1 0;
+        max-width: 300px;
+      }
+      .hp span {
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        color: var(--dim);
+      }
+      .hp .bar {
+        height: 7px;
+        margin-top: 4px;
+        border-radius: 99px;
+        background: #1a222c;
+        overflow: hidden;
+      }
+      .hp .bar i {
+        display: block;
+        height: 100%;
+        width: 100%;
+        border-radius: 99px;
+        transition: width 0.45s ease;
+      }
+      .hp.you .bar i {
+        background: linear-gradient(90deg, #7fd84c, var(--accent));
+      }
+      .hp.them .bar i {
+        background: linear-gradient(90deg, #c14a4a, var(--bad));
+      }
+      .hp.them {
+        text-align: right;
+      }
+      .round {
+        min-width: 180px;
+      }
+      .round #round-label {
+        font-size: 12px;
+        letter-spacing: 0.12em;
+      }
+      .round #owner-label {
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: var(--dim);
+      }
+      .round #owner-label.you {
+        color: var(--accent);
+      }
+      .round #owner-label.them {
+        color: var(--bad);
+      }
+      .clock {
+        height: 4px;
+        margin: 12px auto 0;
+        max-width: 640px;
+        border-radius: 99px;
+        background: #161d25;
+        overflow: hidden;
+      }
+      .clock i {
+        display: block;
+        height: 100%;
+        width: 100%;
+        background: var(--accent);
+        transition: background 0.3s ease;
+      }
+      .clock i.low {
+        background: var(--bad);
+      }
+      .scores {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 30px;
+        margin-top: 4px;
+        min-height: 44px;
+      }
+      .score {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+      }
+      .score b {
+        font-size: 30px;
+        line-height: 1.05;
+        font-variant-numeric: tabular-nums;
+        color: var(--dim);
+        transition: color 0.25s ease;
+      }
+      .score span {
+        font-size: 9px;
+        letter-spacing: 0.22em;
+        color: var(--dim);
+      }
+      .score.win b,
+      .score.win span {
+        color: var(--accent);
+      }
+      .score.lose b {
+        color: var(--bad);
+      }
+      .verdict {
+        max-width: 660px;
+        margin: 2px auto 0;
+      }
+      .verdict-line {
+        font-size: 13.5px;
+        letter-spacing: 0.1em;
+      }
+      .verdict-line.good {
+        color: var(--accent);
+      }
+      .verdict-line.bad {
+        color: var(--bad);
+      }
+      /* One quiet line of facts, so the result reads at a glance. */
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 5px;
+        font-size: 11.5px;
+        color: var(--dim);
+      }
+      .facts i {
+        font-style: normal;
+        color: #3a444f;
+      }
+      .facts b {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .facts .found b {
+        color: var(--accent);
+      }
+
+      /* -------------------------------------------------------- controls --- */
+      .controls {
+        padding: 46px 16px 14px;
+        text-align: center;
+        background: linear-gradient(
+          0deg,
+          rgba(7, 9, 11, 0.94) 0%,
+          rgba(7, 9, 11, 0.8) 45%,
+          rgba(7, 9, 11, 0) 100%
+        );
+      }
+      .readout {
+        min-height: 21px;
+        font-size: 12.5px;
+        letter-spacing: 0.04em;
+        color: var(--dim);
+      }
+      .readout.ok {
+        color: var(--accent);
+      }
+      .readout.bad {
+        color: var(--bad);
+      }
+      .readout.shake {
+        animation: shake 0.3s ease;
+      }
+      @keyframes shake {
+        25% {
+          transform: translateX(-4px);
+        }
+        75% {
+          transform: translateX(4px);
+        }
+      }
+      #next-row {
+        margin-bottom: 8px;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+      .buttons button {
+        font: inherit;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #10150a;
+        font-weight: 700;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      button.ghost {
+        font: inherit;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--dim);
+        cursor: pointer;
+      }
+      .wall {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+        margin-top: 10px;
+        min-height: 22px;
+      }
+      .chip {
+        display: flex;
+        gap: 6px;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 11px;
+        background: #141a21;
+        border: 1px solid var(--line);
+      }
+      .chip.good .chip-y {
+        color: var(--accent);
+      }
+      .chip.bad .chip-y {
+        color: var(--bad);
+      }
+      .chip-r,
+      .chip-x {
+        color: var(--dim);
+      }
+
+      /* ----------------------------------------------------------- tiles --- */
+      .tile {
+        position: relative;
+        width: 42px;
+        height: 46px;
+        border-radius: 7px;
+        border: 1px solid #2a333d;
+        background: linear-gradient(180deg, #212a33, #161d25);
+        color: var(--ink);
+        font: inherit;
+        cursor: pointer;
+      }
+      .tile .tl {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .tile .tv {
+        position: absolute;
+        right: 5px;
+        bottom: 3px;
+        font-size: 10px;
+        color: var(--dim);
+      }
+      .tile.blank .tl {
+        color: var(--accent);
+      }
+      #blank-picker {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        pointer-events: auto;
+        background: rgba(7, 9, 11, 0.86);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 20px;
+      }
+      .picker-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        max-width: 420px;
+      }
+
+      /* --------------------------------------------------------- screens --- */
+      .screen {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 22px;
+        overflow-y: auto;
+        background: linear-gradient(180deg, rgba(7, 9, 11, 0.72), rgba(7, 9, 11, 0.94));
+        backdrop-filter: blur(3px);
+        text-align: center;
+      }
+      .brand {
+        font-size: 30px;
+        letter-spacing: 0.22em;
+        font-weight: 800;
+      }
+      .tag {
+        margin: 0;
+        max-width: 540px;
+        color: var(--dim);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+      .tag em {
+        color: var(--ink);
+        font-style: normal;
+      }
+      .pick-h {
+        font-size: 10.5px;
+        letter-spacing: 0.24em;
+        color: var(--dim);
+        margin-top: 4px;
+      }
+      .pick-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .pick-option {
+        font: inherit;
+        min-width: 118px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        cursor: pointer;
+      }
+      .pick-option b {
+        display: block;
+        font-size: 13px;
+        letter-spacing: 0.1em;
+      }
+      .pick-option span {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .pick-option.on {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent) inset;
+      }
+      .pick-option.on b {
+        color: var(--accent);
+      }
+      /* The board choices carry a swatch drawn from the same cloth as the table. */
+      .pick-option.with-swatch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 150px;
+        text-align: left;
+      }
+      .pick-option .swatch {
+        display: block;
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+      }
+      button.big {
+        padding: 12px 34px;
+        font-size: 15px;
+        margin-top: 6px;
+      }
+      .dict {
+        font-size: 11px;
+        color: #5c6673;
+      }
+      .player-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+      .player-card img {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #1d242c;
+      }
+      .player-card .who {
+        text-align: left;
+        min-width: 130px;
+      }
+      .player-card .nm {
+        font-size: 13px;
+      }
+      .player-card .ac {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .board-card {
+        width: min(560px, 92vw);
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        text-align: left;
+      }
+      .board-card ol {
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12px;
+      }
+      .board-card li {
+        display: flex;
+        gap: 10px;
+        padding: 4px 0;
+        border-top: 1px solid #1a222b;
+      }
+      .board-card li:first-child {
+        border-top: 0;
+      }
+      .board-card li.me {
+        color: var(--accent);
+      }
+      .board-rank {
+        width: 22px;
+        color: var(--dim);
+      }
+      .board-name {
+        flex: 1;
+      }
+      .board-stats {
+        color: var(--dim);
+      }
+      .board-empty {
+        color: var(--dim);
+      }
+      .report-h {
+        font-size: 10.5px;
+        letter-spacing: 0.2em;
+        color: var(--dim);
+        margin-bottom: 6px;
+      }
+      #result {
+        justify-content: flex-start;
+        padding-top: 40px;
+      }
+      .result-title {
+        font-size: 26px;
+        letter-spacing: 0.16em;
+      }
+      .result-title.good {
+        color: var(--accent);
+      }
+      .result-title.bad {
+        color: var(--bad);
+      }
+      .result-sub {
+        color: var(--dim);
+        font-size: 12.5px;
+      }
+      .run-note {
+        font-size: 12px;
+        color: var(--dim);
+        min-height: 18px;
+      }
+      .run-note.good {
+        color: var(--accent);
+      }
+      .report-block {
+        width: min(560px, 92vw);
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        text-align: left;
+      }
+      .report-block ul {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 12.5px;
+        color: var(--dim);
+      }
+      .word-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .mini-tile {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        background: #1a222b;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      .mini-tile i {
+        font-style: normal;
+        font-size: 10px;
+        color: var(--dim);
+      }
+      .mini-tile.hit {
+        background: #26330f;
+        color: var(--accent);
+      }
+      #boot {
+        font-size: 13px;
+        color: var(--dim);
+      }
+
+      @media (max-width: 640px) {
+        .brand {
+          font-size: 26px;
+        }
+        .scores .score b {
+          font-size: 24px;
+        }
+        .round {
+          min-width: 120px;
+        }
+        .buttons button,
+        button.ghost {
+          padding: 8px 13px;
+          font-size: 12.5px;
+        }
+        .wall {
+          display: none;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/main-CtlrK3BM.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
   </head>
   <body>
-    <div id="app">
-      <div class="startng-card" id="player-card" hidden>
-        <img id="player-face" alt="" />
-        <div class="player-meta">
-          <b id="player-name"></b>
-          <span id="player-account"></span>
-        </div>
-        <button id="player-sign-in" hidden>Sign in</button>
-      </div>
+    <div id="stage"></div>
 
-      <section id="boot">
-        <div class="boot-mark">PICK ME</div>
-        <div class="boot-msg" id="boot-msg">Shuffling the word list…</div>
-        <div class="boot-bar"><i></i></div>
-      </section>
-
-      <section id="title" class="hidden">
-        <h1>PICK ME</h1>
-        <p class="tagline">Two words. One survives.</p>
-
-        <div class="rule-card">
-          <p>
-            You and your opponent are dealt <b>the same seven letters</b>.
-          </p>
-          <p>
-            One word each, before the clock stops, scored against the other —
-            and only the higher one stays on the board.
-          </p>
-          <p>
-            Whatever is on your board when the clock runs out is played for you.
-          </p>
-        </div>
-
-        <div class="pick">
-          <div class="pick-label">Opponent</div>
-          <div class="pick-row" id="diff-row"></div>
-        </div>
-
-        <div class="pick">
-          <div class="pick-label">Wahala</div>
-          <div class="pick-row" id="clock-row"></div>
-          <div class="pick-note">
-            Only Serious wahala — 20 seconds — counts for the leaderboard.
+    <!-- ---------------------------------------------------------- match -->
+    <section id="match" class="overlay hidden">
+      <header class="hud">
+        <div class="kicker">PICK ME</div>
+        <div class="hp-row">
+          <div class="hp you">
+            <span>YOU</span>
+            <div class="bar"><i id="hp-you"></i></div>
           </div>
-        </div>
-
-        <button class="primary" id="btn-start">Start duel</button>
-        <button class="ghost" id="btn-daily">Daily duel · pro</button>
-
-        <div class="board-card" id="board-card" hidden>
-          <div class="board-h">Leaderboard</div>
-          <ol id="board-list"></ol>
-        </div>
-
-        <p class="fine" id="dict-note"></p>
-      </section>
-
-      <section id="match" class="hidden">
-        <header id="hud">
-          <div class="hp">
-            <div class="hp-name">YOU</div>
-            <div class="hp-track"><i id="hp-you"></i></div>
-          </div>
-          <div class="hud-centre">
-            <div class="hud-top">
-              <span id="round-label">ROUND 1</span>
-              <span id="owner-label"></span>
-            </div>
-            <div class="hud-timer"><i id="timer-fill"></i></div>
+          <div class="round">
+            <div id="round-label">ROUND 1</div>
+            <div id="owner-label" class="you">TIES GO TO YOU</div>
           </div>
           <div class="hp them">
-            <div class="hp-name" id="them-name">CLUB</div>
-            <div class="hp-track"><i id="hp-them"></i></div>
-          </div>
-        </header>
-
-        <div id="lane">
-          <div class="mrow">
-            <span class="mtag" id="them-tag">THEM</span>
-            <div class="tiles" id="their-word"></div>
-            <span class="mscore" id="their-score"></span>
-          </div>
-          <div class="divider"></div>
-          <div class="mrow">
-            <span class="mtag" id="you-tag">YOU</span>
-            <div class="tiles" id="your-word"></div>
-            <span class="mscore" id="your-score"></span>
+            <span id="them-name">SHARP</span>
+            <div class="bar"><i id="hp-them"></i></div>
           </div>
         </div>
+        <div class="clock"><i id="timer-fill"></i></div>
+        <div class="scores">
+          <div class="score" id="score-you"><b id="your-score"></b><span>YOU</span></div>
+          <div class="score" id="score-them"><b id="their-score"></b><span>THEM</span></div>
+        </div>
+        <div id="verdict" class="verdict"></div>
+      </header>
 
-        <div id="verdict"></div>
-        <div id="notice"></div>
-        <div id="wall"></div>
+      <footer class="controls">
+        <div id="readout" class="readout"></div>
+        <div id="next-row" class="hidden">
+          <button class="primary" id="btn-next">Next round</button>
+        </div>
+        <div class="buttons">
+          <button id="btn-shuffle">Shuffle</button>
+          <button id="btn-clear">Clear</button>
+          <button id="btn-pass">Pass</button>
+          <button class="primary" id="btn-play">Play</button>
+        </div>
+        <div id="wall" class="wall"></div>
+      </footer>
+    </section>
 
-        <footer id="tray">
-          <div class="rack" id="rack"></div>
-          <div class="controls">
-            <button class="ghost" id="btn-shuffle">Shuffle</button>
-            <button class="ghost" id="btn-clear">Clear</button>
-            <button class="ghost" id="btn-pass">Pass</button>
-            <button class="primary" id="btn-play">Play word</button>
-          </div>
-          <div class="next-row hidden" id="next-row">
-            <button class="primary" id="btn-next">Next round</button>
-          </div>
-        </footer>
-      </section>
+    <div id="blank-picker" class="hidden"></div>
 
-      <section id="result" class="hidden"></section>
+    <!-- --------------------------------------------------------- result -->
+    <section id="result" class="screen hidden"></section>
 
-      <div id="blank-picker" class="hidden"></div>
-    </div>
+    <!-- ---------------------------------------------------------- title -->
+    <section id="title" class="screen hidden">
+      <div class="brand">PICK ME</div>
+      <p class="tag">
+        Both players get the <em>same letters</em> and a <em>short clock</em>. Lay one word
+        each. The better word takes the round and kicks the other off the board —
+        and on a draw the turn owns it.
+      </p>
+      <div class="player-card" id="player-card" hidden>
+        <img id="player-face" alt="" />
+        <div class="who">
+          <div class="nm" id="player-name"></div>
+          <div class="ac" id="player-account"></div>
+        </div>
+        <button class="ghost" id="player-sign-in">Sign in</button>
+      </div>
+      <div class="pick-h">OPPONENT</div>
+      <div class="pick-row" id="diff-row"></div>
+      <div class="pick-h">WAHALA</div>
+      <div class="pick-row" id="clock-row"></div>
+      <div class="pick-h">BOARD</div>
+      <div class="pick-row" id="fabric-row"></div>
+      <button class="primary big" id="btn-start">Duel</button>
+      <button class="ghost" id="btn-daily">Daily, against Pro</button>
+      <div class="dict" id="dict-note"></div>
+      <div class="board-card" id="board-card" hidden>
+        <div class="report-h">LEADERBOARD · 20-SECOND RUNS</div>
+        <ol id="board-list"></ol>
+      </div>
+    </section>
+
+    <section id="boot" class="screen">
+      <p id="boot-msg">Loading the word list…</p>
+    </section>
+
   </body>
 </html>

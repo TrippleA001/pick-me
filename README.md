@@ -45,7 +45,7 @@ The bot is the same seven letters played at three levels of nerve:
 
 - **Rookie** — plays between 35% and 70% of the best available score. It will
   miss the bingo and it will let you take rounds off it.
-- **Club** — plays at least 80% of the best available score. It does not hand
+- **Sharp** — plays at least 80% of the best available score. It does not hand
   rounds over, but it does not always find the top word.
 - **Pro** — plays the best word on the board, every time. It is the oracle. If
   you beat Pro it is because you found the best word yourself, and then some.
@@ -74,6 +74,27 @@ is never a lost word. Only an empty or invalid board takes a zero.
 A daily duel at Pro difficulty replays the same racks for everyone, so the same
 words are available to every player all day.
 
+## The board
+
+The board is a real one. You lay your word on it; your opponent's word is dealt
+out of their tray, back-to-you, on the far side. At time up the two words turn
+to face each other — yours turns its back to you and goes to glass, theirs turns
+its face to you — and then they charge. Only when they hit do the scores appear,
+so you watch the round land before you know how it went. The loser's word is
+struck through and thrown off the board.
+
+Both trays sit on the table holding the same letters, because that is the rule
+of the game. Their selection is the part you cannot see, which is why their tiles
+flip away as they land.
+
+The cloth is your choice of **Ankara** or **Adire**, picked on the setup screen
+before the match rather than as a mid-game control. Both are drawn procedurally,
+so they can be swapped for real fabric scans without touching the game.
+
+The board is WebGL. If a device cannot give us a context, it is handed the same
+game drawn in the DOM instead, at `2d.html` — same rules, same bot, same
+dictionary.
+
 ## Leaderboard
 
 Runs are saved to start.ng once you sign in, and ranked by **Beat Pro** — the
@@ -99,9 +120,14 @@ anything itself.
 ## Layout
 
 ```
-index.html, assets/       the built game start.ng serves
+index.html, assets/       the built 3D game start.ng serves
+2d.html                   the same game drawn in the DOM, for devices without WebGL
 data/enable1.txt          the word list
 startng.json              leaderboard columns
 cover.png                 the card on the start.ng homepage
 app/                      the Vite + TypeScript source
 ```
+
+Inside `app/`, `src/game/` is the rules — racks, scoring, the bot, the study
+card — with no DOM in it at all. `src/main.ts` draws that game in the DOM and
+`src/scene/` draws it on a board; `src/scene/entry.ts` picks between them.
