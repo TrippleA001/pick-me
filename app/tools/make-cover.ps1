@@ -100,7 +100,7 @@ $rule = New-Object System.Drawing.Pen -ArgumentList (Col "#232b35"), 2
 $g.DrawLine($rule, 380, 621, 1220, 621)
 
 $dot = [char]0x00B7
-$g.DrawString("you both get the same seven letters $dot 20 seconds $dot the higher word survives", $footFont, (Brush "#6b7684"), (New-Object System.Drawing.RectangleF -ArgumentList 0, 872, $W, 50), $mid)
+$g.DrawString("you both get the same seven letters $dot a short clock $dot the higher word survives", $footFont, (Brush "#6b7684"), (New-Object System.Drawing.RectangleF -ArgumentList 0, 872, $W, 50), $mid)
 
 $dir = Split-Path $out
 if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }

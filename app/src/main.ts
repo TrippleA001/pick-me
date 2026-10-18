@@ -18,7 +18,23 @@ import { isWord, loadDictionary, solve, wordCount } from "./game/words";
 import { readBoard, saveScore, signInUrl, whoAmI } from "./startng";
 import type { BoardEntry, StartNgPlayer } from "./startng";
 
-const ROUND_MS = 20000;
+/**
+ * Only this clock is ranked. More time is genuinely an easier game, so a run
+ * played on a longer clock is kept off the leaderboard.
+ */
+const RANKED_MS = 20000;
+
+interface Clock {
+  name: string;
+  blurb: string;
+  ms: number;
+}
+
+const CLOCKS: Clock[] = [
+  { name: "No wahala", blurb: "60 seconds", ms: 60000 },
+  { name: "Small wahala", blurb: "40 seconds", ms: 40000 },
+  { name: "Serious wahala", blurb: "20 seconds", ms: RANKED_MS },
+];
 
 type Screen = "boot" | "title" | "match" | "result";
 
@@ -48,6 +64,8 @@ interface Built {
 }
 
 let difficulty: Difficulty = "club";
+let clockMs = RANKED_MS;
+let matchRanked = true;
 let duel: DuelState | null = null;
 let rack: string[] = [];
 let built: Built[] = [];
@@ -80,6 +98,19 @@ function buildTitle(): void {
     });
     row.appendChild(button);
   }
+
+  const clockRow = el("clock-row");
+  clockRow.innerHTML = "";
+  for (const clock of CLOCKS) {
+    const button = document.createElement("button");
+    button.className = "pick-option" + (clock.ms === clockMs ? " on" : "");
+    button.innerHTML = `<b>${clock.name}</b><span>${clock.blurb}</span>`;
+    button.addEventListener("click", () => {
+      clockMs = clock.ms;
+      buildTitle();
+    });
+    clockRow.appendChild(button);
+  }
 }
 
 /* ---------------------------------------------------------------- match --- */
@@ -89,6 +120,7 @@ function startMatch(daily: boolean): void {
     ? hash32(`daily:${todaySeed()}`)
     : Math.floor(Math.random() * 4294967296);
   duel = newDuel(seed, daily ? `DAILY ${todaySeed()}` : "EXHIBITION");
+  matchRanked = clockMs === RANKED_MS;
   show("match");
   startRound();
 }
@@ -130,13 +162,13 @@ function startRound(): void {
 }
 
 function beginTimer(): void {
-  timerEnd = performance.now() + ROUND_MS;
+  timerEnd = performance.now() + clockMs;
   cancelAnimationFrame(rafId);
   const tick = () => {
     if (phase !== "play") return;
     const left = Math.max(0, timerEnd - performance.now());
     const fill = el("timer-fill");
-    fill.style.width = `${(left / ROUND_MS) * 100}%`;
+    fill.style.width = `${(left / clockMs) * 100}%`;
     fill.classList.toggle("low", left < 5000);
     if (left <= 0) {
       timeUp();
@@ -151,10 +183,12 @@ function stopTimer(): void {
   cancelAnimationFrame(rafId);
 }
 
+/** The clock plays whatever is on the board, so a slow tap is not a lost word. */
 function timeUp(): void {
   if (phase !== "play") return;
   const word = built.map((item) => item.letter).join("");
   if (word.length >= 2 && isWord(word)) {
+    setNotice("Out of time — your word counts.");
     play(false);
     return;
   }
@@ -610,6 +644,8 @@ function storeCareer(career: Career): void {
 /** Career bests, persisted locally; start.ng keeps the best run it is sent. */
 function recordRun(state: DuelState, outcome: string): Career {
   const career = loadCareer();
+  // A longer clock is an easier game, so it never touches the ranked bests.
+  if (!matchRanked) return career;
   if (outcome === "you" && difficulty === "pro") career.proWins += 1;
   for (const round of state.history) {
     career.bestWord = Math.max(career.bestWord, round.yourScore);
@@ -672,6 +708,10 @@ async function loadBoard(): Promise<void> {
 
 async function submitRun(career: Career): Promise<void> {
   const note = el("run-note");
+  if (!matchRanked) {
+    note.textContent = "Not ranked — only 20-second runs count.";
+    return;
+  }
   if (career.bestWord === 0) return;
   if (!me) {
     note.textContent = "Sign in to save your score.";
@@ -761,6 +801,12 @@ function installDevHook(): void {
     setDifficulty: (tier: Difficulty) => {
       difficulty = tier;
     },
+    clock: () => clockMs,
+    setClock: (ms: number) => {
+      clockMs = ms;
+    },
+    timeUp,
+    ranked: () => matchRanked,
   };
 }
 

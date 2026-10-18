@@ -14,7 +14,7 @@ can find in twenty seconds and you live with it.
 | Rule | Detail |
 | --- | --- |
 | Letters | The same seven tiles for both players, drawn from a seeded rack |
-| Time | 20 seconds a round. No take-backs |
+| Time | 60, 40 or 20 seconds a round. Whatever is on your board when the clock stops is played for you |
 | Word length | Two letters minimum, seven maximum |
 | Score | Standard tile values, plus 50 for using all seven (a bingo) |
 | Blanks | Any letter, worth nothing on its own |
@@ -23,6 +23,21 @@ can find in twenty seconds and you live with it.
 | A draw | The player who owns the turn takes the round. Ties still bleed |
 | Health | 60 each, so a match is a handful of rounds, not a war |
 | Turn owner | Alternates every round — winning the turn matters |
+
+## The clock
+
+Three settings, named for how much trouble you are in:
+
+| Setting | Clock | Ranked |
+| --- | --- | --- |
+| No wahala | 60 seconds | no |
+| Small wahala | 40 seconds | no |
+| Serious wahala | 20 seconds | yes |
+
+Only Serious wahala counts for the leaderboard. A longer clock is a genuinely
+easier game — more time to spot the bingo — so a 60-second run sitting above a
+20-second one would make the board say nothing. The longer clocks are there to
+learn on, and they still give you the full study card.
 
 ## The opponent
 
@@ -52,8 +67,9 @@ refuses, it is the list talking, not the bot.
 ## Playing
 
 You are dealt seven tiles. Tap them to lay a word down — a `*` tile is a blank
-and asks which letter it is standing in for. Press **Play** before the clock
-runs out, or the round is recorded as a zero and you take it on the chin.
+and asks which letter it is standing in for. Press **Play** when you are ready;
+if you don't, the clock plays whatever is on your board for you, so a slow tap
+is never a lost word. Only an empty or invalid board takes a zero.
 
 A daily duel at Pro difficulty replays the same racks for everyone, so the same
 words are available to every player all day.

@@ -155,6 +155,13 @@ button {
   justify-content: center;
 }
 
+.pick-note {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #5c6673;
+  text-align: center;
+}
+
 .pick-option {
   flex: 1;
   background: var(--panel);
