@@ -1,0 +1,9 @@
+{
+  "leaderboard": {
+    "stats": [
+      { "key": "pro_wins", "label": "Beat Pro", "order": "highest" },
+      { "key": "best_word", "label": "Best word", "order": "highest" },
+      { "key": "best_margin", "label": "Best round", "order": "highest" }
+    ]
+  }
+}

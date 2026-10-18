@@ -1,0 +1,5 @@
+# Keep the committed bytes predictable: LF everywhere, binary where it matters.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.woff2 binary

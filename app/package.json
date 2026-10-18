@@ -1,0 +1,17 @@
+{
+  "name": "pick-me",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "ship": "tsc --noEmit && vite build && node scripts/sync.mjs",
+    "preview": "vite preview",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0"
+  }
+}

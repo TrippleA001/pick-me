@@ -1,0 +1,14 @@
+# The Vite source lives in app/; its output is published from the repo root.
+app/node_modules/
+app/dist/
+app/.vite/
+app/**/tsconfig.tsbuildinfo
+
+# In case a command is ever run from the root by mistake.
+node_modules/
+.vite/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.log
