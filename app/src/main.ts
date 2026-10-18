@@ -151,6 +151,7 @@ function startRound(): void {
   el("verdict").innerHTML = "";
   setNotice("");
   el("next-row").classList.add("hidden");
+  el("blank-picker").classList.add("hidden");
 
   renderHud();
   renderRound();
@@ -215,6 +216,8 @@ function play(pass: boolean): void {
   phase = "reveal";
   stopTimer();
   setControls(false);
+  // The picker is a modal: the clock can expire while it is open.
+  el("blank-picker").classList.add("hidden");
 
   const rng = mulberry32(hash32(`${duel.seed}:bot:${duel.round}`));
   botWord = botPick(rack, difficulty, rng);
